@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form th:action="@{/getAllData}" method="get">
+        <input type="submit" value="获取所有数据"/>
+    </form>
+<br>
+    <form th:action="@{/getSelectedData}" method="get">
+        <input type="submit" value="获取节选数据"/>
+    </form>
+</body>
+</html>
