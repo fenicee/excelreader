@@ -2,7 +2,6 @@ package com.excelreader.demo.service;
 
 import com.excelreader.demo.controller.ExcelReader;
 import com.excelreader.demo.entity.AuditLog;
-import com.excelreader.demo.entity.SimpleEmailEntity;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +13,16 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
-public class EmailQuartzJob extends QuartzJobBean {
+public class EmailExecService {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
+    SimpleDateFormat sdfdate = new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
     ExcelReader excelReader;
 
@@ -35,20 +31,11 @@ public class EmailQuartzJob extends QuartzJobBean {
     @Value("${spring.mail.username}")
     private String from;
 
-    @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+
+    public void executeEveryFRI(){
         //这里写业务
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper mineHelper = null;
-        try {
-            mineHelper = new MimeMessageHelper(message, true);
-            mineHelper.setFrom(from);
-            mineHelper.setTo("121469787@qq.com");
-            mineHelper.setSubject("本周的云桌面登入情况");
-
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
 
         Date date = new Date();
         List<AuditLog> auditLogs = null;
@@ -81,12 +68,22 @@ public class EmailQuartzJob extends QuartzJobBean {
                 }
             }
             // 从list中索引为0开始往后遍历
+        String str = "";
+        for (AuditLog auditlog: selectedlogs
+             ) {
+            str+=auditlog.getDescription().getName()+"   "+sdf.format(auditlog.getOperate_time())+"\r\n";
+        }
         try {
-            mineHelper.setText(selectedlogs.toString());
+            mineHelper = new MimeMessageHelper(message, true);
+            mineHelper.setFrom(from);
+            mineHelper.setTo("121469787@qq.com");
+            mineHelper.setSubject("本周的云桌面登入情况"+sdfdate.format(date)+"至"+sdfdate.format(new Date()));
+            mineHelper.setText(str);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
         javaMailSender.send(message);
-
     }
+
+
 }
